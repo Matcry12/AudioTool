@@ -1,6 +1,6 @@
 # TTS Story Converter
 
-A Python application that converts long text files to high-quality audio using Microsoft Edge Text-to-Speech (TTS). Supports both English and Vietnamese voices with smart text chunking and audio organization.
+A cross-platform Python application that converts long text files to high-quality audio using Microsoft Edge Text-to-Speech (TTS). Supports both English and Vietnamese voices with smart text chunking and audio organization. Works on Windows, Ubuntu, and other Linux distributions.
 
 ## ✨ Features
 
@@ -12,25 +12,54 @@ A Python application that converts long text files to high-quality audio using M
 - 🐍 **Python 3.13 compatible**: No dependency issues with latest Python
 - 🔗 **Optional merging**: Automatic audio merging with ffmpeg (if installed)
 - ⚡ **Robust generation**: Uses streaming method for reliable audio creation
+- 🐧 **Cross-platform**: Works on Windows, Ubuntu, and other Linux distributions
 
 ## 🚀 Quick Start
 
-### Installation
+### Ubuntu/Linux Quick Setup
+```bash
+# 1. Install dependencies
+./install_dependencies.sh
+
+# 2. Run the launcher
+./launch.sh
+
+# 3. Choose option 1 for the GUI version
+```
+
+### Full Installation
 
 1. **Clone or download** this repository
 2. **Install dependencies**:
+   
+   **Windows:**
    ```bash
    pip install -r requirements.txt
    ```
-   *Or run `install_dependencies.bat` on Windows*
+   *Or run `install_dependencies.bat`*
+   
+   **Ubuntu/Linux:**
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+   *Or run `./install_dependencies.sh`*
 
-3. **Optional**: Install [ffmpeg](https://ffmpeg.org/download.html) for automatic audio merging
+3. **Optional**: Install ffmpeg for automatic audio merging:
+   - **Windows**: Download from [ffmpeg.org](https://ffmpeg.org/download.html)
+   - **Ubuntu/Linux**: `sudo apt-get install ffmpeg`
 
 ### Usage
 
 #### GUI Version (Recommended)
+
+**Windows:**
 ```bash
 python tts_gui_py313.py
+```
+
+**Ubuntu/Linux:**
+```bash
+python3 tts_gui_py313.py
 ```
 
 #### Command Line Version
@@ -42,19 +71,31 @@ python tts_gui_py313.py
    ```
 
 2. Run the script:
+   
+   **Windows:**
    ```bash
    python tts_converter_py313.py
    ```
+   
+   **Ubuntu/Linux:**
+   ```bash
+   python3 tts_converter_py313.py
+   ```
 
 #### Easy Launcher
-Double-click `launch.bat` and choose your preferred version.
+
+**Windows:** Double-click `launch.bat`
+
+**Ubuntu/Linux:** Run `./launch.sh`
 
 ## 📂 Project Structure
 
 ```
 TTS/
-├── 🚀 launch.bat                    # Application launcher
-├── 📦 install_dependencies.bat      # Dependency installer
+├── 🚀 launch.bat                    # Windows launcher
+├── 🚀 launch.sh                     # Linux/Ubuntu launcher
+├── 📦 install_dependencies.bat      # Windows dependency installer
+├── 📦 install_dependencies.sh       # Linux/Ubuntu dependency installer
 ├── 🖥️ tts_gui_py313.py             # GUI version (Python 3.13)
 ├── 📜 tts_converter_py313.py        # Command line (Python 3.13)
 ├── 🖥️ tts_gui.py                   # GUI version (Legacy)
@@ -132,19 +173,39 @@ KEEP_CHUNKS = True                       # Keep individual chunks
 
 ## 🛠️ Installation Methods
 
-### Method 1: Automatic (Windows)
+### Method 1: Automatic
+
+**Windows:**
 ```bash
-# Run the installer batch file
 install_dependencies.bat
 ```
 
+**Ubuntu/Linux:**
+```bash
+./install_dependencies.sh
+```
+
 ### Method 2: Manual
+
+**Windows:**
 ```bash
 # Install Python dependencies
 pip install edge-tts
 
 # Optional: Install ffmpeg for merging
 # Download from: https://ffmpeg.org/download.html
+```
+
+**Ubuntu/Linux:**
+```bash
+# Install Python dependencies
+pip3 install edge-tts
+
+# Install tkinter if needed
+sudo apt-get install python3-tk
+
+# Optional: Install ffmpeg for merging
+sudo apt-get install ffmpeg
 ```
 
 ### Method 3: Virtual Environment
@@ -155,7 +216,7 @@ python -m venv venv
 # Activate (Windows)
 venv\Scripts\activate
 
-# Activate (Linux/Mac)
+# Activate (Ubuntu/Linux/Mac)
 source venv/bin/activate
 
 # Install dependencies

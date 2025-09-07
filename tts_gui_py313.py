@@ -26,7 +26,7 @@ class TTSConverterGUI:
         self.root.resizable(True, True)
         
         # Default settings
-        self.folder_path = Path(r"C:\Users\fdtyw\Documents\TTS")
+        self.folder_path = Path.cwd()
         self.voices = {
             "English Female (Jenny)": "en-US-JennyNeural",
             "Vietnamese Female (Hoai My)": "vi-VN-HoaiMyNeural"

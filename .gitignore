@@ -64,14 +64,18 @@ temp_*
 *.log
 logs/
 
-# Audio files (except samples)
+# Source directory - ignore all files except samples
+Source/*
+!Source/.gitkeep
+!Source/sample.txt
+!Source/script.txt
+
+# Audio files (except in Source folder samples)
 *.mp3
 *.wav
 *.flac
 *.aac
 *.ogg
-!Source/sample.txt
-!Source/script.txt
 
 # Large files
 *.zip

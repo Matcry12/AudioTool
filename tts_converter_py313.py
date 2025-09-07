@@ -301,7 +301,7 @@ def main():
     """Main function - modify the input filename here."""
     
     # Configuration
-    FOLDER_PATH = r"C:\Users\fdtyw\Documents\TTS"
+    FOLDER_PATH = os.getcwd()
     INPUT_FILENAME = "Source/script.txt"  # <- Change this to your text file name
     OUTPUT_PREFIX = "story"               # <- Prefix for output files
     VOICE_CHOICE = "English Female"       # <- "English Female" or "Vietnamese Female"

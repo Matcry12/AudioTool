@@ -245,7 +245,7 @@ def main():
     """Main function - modify the input filename here."""
     
     # Configuration
-    FOLDER_PATH = r"C:\Users\fdtyw\Documents\TTS"
+    FOLDER_PATH = os.getcwd()
     INPUT_FILENAME = "script.txt"  # ← Change this to your text file name
     VOICE_CHOICE = "English Female"  # ← "English Female" or "Vietnamese Female"
     
