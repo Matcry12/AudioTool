@@ -1,0 +1,18 @@
+# TTS Story Converter - Requirements
+
+# Core dependencies for Python 3.13+ (recommended)
+edge-tts>=6.1.0
+
+# GUI framework (usually included with Python)
+# tkinter  # Uncomment if not included with your Python installation
+
+# Optional dependencies for legacy Python versions (< 3.13)
+# pydub>=0.25.1  # For audio merging (requires ffmpeg)
+
+# Development dependencies (optional)
+# pytest>=7.0.0  # For running tests
+# black>=22.0.0  # Code formatting
+# flake8>=4.0.0  # Code linting
+
+# Note: ffmpeg is required for audio merging but must be installed separately
+# Download from: https://ffmpeg.org/download.html

@@ -5,33 +5,53 @@ echo ==========================================
 echo    Installing TTS Converter Dependencies
 echo ==========================================
 echo.
-echo This will install the required packages:
+echo This will install the required packages for TTS Story Converter:
 echo - edge-tts (Microsoft Edge Text-to-Speech)
-echo - pydub (Audio processing)
 echo.
-echo Note: You may need ffmpeg for audio merging.
-echo If merging fails, install ffmpeg from: https://ffmpeg.org/download.html
+echo Optional (install separately):
+echo - ffmpeg for audio merging: https://ffmpeg.org/download.html
 echo.
 pause
 
 echo.
-echo Installing edge-tts...
-pip install edge-tts
+echo Checking Python version...
+python --version
 if %errorlevel% neq 0 (
     echo.
-    echo ERROR: Failed to install edge-tts
+    echo ERROR: Python is not installed or not in PATH
+    echo Please install Python from: https://python.org/downloads/
     pause
     exit /b 1
 )
 
 echo.
-echo Installing pydub...
-pip install pydub
+echo Installing dependencies from requirements.txt...
+pip install -r requirements.txt
 if %errorlevel% neq 0 (
     echo.
-    echo ERROR: Failed to install pydub
-    pause
-    exit /b 1
+    echo ERROR: Failed to install dependencies
+    echo Trying alternative installation method...
+    echo.
+    echo Installing edge-tts directly...
+    pip install edge-tts
+    if %errorlevel% neq 0 (
+        echo.
+        echo ERROR: Failed to install edge-tts
+        echo Please check your internet connection and try again
+        pause
+        exit /b 1
+    )
+)
+
+echo.
+echo Checking if ffmpeg is available...
+ffmpeg -version >nul 2>&1
+if %errorlevel% equ 0 (
+    echo ✓ ffmpeg is available - audio merging will work
+) else (
+    echo ⚠ ffmpeg not found - audio merging will not work
+    echo   You can still use individual chunk files
+    echo   Install ffmpeg from: https://ffmpeg.org/download.html
 )
 
 echo.
@@ -39,12 +59,16 @@ echo ==========================================
 echo    Installation Complete!
 echo ==========================================
 echo.
-echo All required packages have been installed.
-echo You can now run the TTS Converter.
+echo ✓ Python dependencies installed successfully
+echo ✓ TTS Converter is ready to use
 echo.
 echo Next steps:
 echo 1. Double-click "launch.bat" to start the application
-echo 2. Choose the GUI version for the best experience
-echo 3. If audio merging fails, install ffmpeg
+echo 2. Choose the Python 3.13 GUI version (option 1)
+echo 3. Browse for a text file and convert to audio
+echo.
+echo Optional:
+echo - Install ffmpeg for automatic audio merging
+echo - Put your text files in the "Source" folder
 echo.
 pause

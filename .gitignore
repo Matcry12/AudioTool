@@ -1,0 +1,132 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# TTS specific
+# Keep these folders but ignore their contents except for samples
+Output/*.mp3
+Output/*.wav
+Output/*.srt
+!Output/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+chunk_list.txt
+temp_*
+
+# Logs
+*.log
+logs/
+
+# Audio files (except samples)
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+!Source/sample.txt
+!Source/script.txt
+
+# Large files
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# Configuration files with sensitive data
+config.ini
+settings.json
+.env
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# FFmpeg temporary files
+ffmpeg_*
+
+# Test files
+test_output/
+test_*.mp3
+test_*.txt
+
+# Documentation builds
+docs/_build/
+site/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# PyCharm
+.idea/
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
