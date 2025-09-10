@@ -15,7 +15,7 @@ from typing import List
 
 
 class TTSConverter:
-    def __init__(self, folder_path: str, voice: str = "en-US-JennyNeural"):
+    def __init__(self, folder_path: str, voice: str = "en-US-JennyNeural", max_concurrent_chunks: int = 3):
         self.folder_path = Path(folder_path)
         self.voice = voice
         self.rate = "+0%"
@@ -23,6 +23,7 @@ class TTSConverter:
         self.volume = "+0%"
         self.chunk_size_min = 1500
         self.chunk_size_max = 2000
+        self.max_concurrent_chunks = max_concurrent_chunks  # Maximum chunks to process simultaneously
         
         # Voice options
         self.voices = {
@@ -158,29 +159,59 @@ class TTSConverter:
                 output_path.unlink()
             raise RuntimeError(f"TTS generation failed for chunk {chunk_num}: {e}")
     
+    async def generate_chunk_with_semaphore(self, semaphore: asyncio.Semaphore, chunk: str, index: int, prefix: str) -> tuple:
+        """Generate a single chunk with semaphore control."""
+        async with semaphore:
+            try:
+                chunk_file = await self.generate_chunk_audio_robust(chunk, index, prefix)
+                return (index, chunk_file, None)
+            except Exception as e:
+                return (index, None, str(e))
+
     async def generate_all_chunks(self, chunks: List[str], prefix: str = "chunk") -> List[str]:
-        """Generate audio files for all chunks."""
+        """Generate audio files for all chunks with concurrent processing."""
         print(f"\nGenerating audio for {len(chunks)} chunks...")
+        print(f"Processing up to {self.max_concurrent_chunks} chunks simultaneously...")
         
-        chunk_files = []
+        # Create semaphore to limit concurrent tasks
+        semaphore = asyncio.Semaphore(self.max_concurrent_chunks)
+        
+        # Create tasks for all chunks
+        tasks = []
+        valid_chunk_count = 0
         
         for i, chunk in enumerate(chunks, 1):
             if not chunk.strip():  # Skip empty chunks
                 print(f"Skipping empty chunk {i}")
                 continue
             
-            try:
-                chunk_file = await self.generate_chunk_audio_robust(chunk, i, prefix)
+            valid_chunk_count += 1
+            task = self.generate_chunk_with_semaphore(semaphore, chunk, i, prefix)
+            tasks.append(task)
+        
+        # Process all tasks concurrently
+        results = await asyncio.gather(*tasks)
+        
+        # Sort results by index and collect successful files
+        chunk_files = []
+        errors = []
+        
+        for index, chunk_file, error in sorted(results, key=lambda x: x[0]):
+            if chunk_file:
                 chunk_files.append(chunk_file)
-            except Exception as e:
-                print(f"Error generating chunk {i}: {e}")
-                # Continue with other chunks instead of failing completely
-                continue
+            else:
+                errors.append((index, error))
+        
+        # Report any errors
+        if errors:
+            print(f"\nEncountered {len(errors)} errors during chunk generation:")
+            for index, error in errors:
+                print(f"  Chunk {index}: {error}")
         
         if not chunk_files:
             raise RuntimeError("No audio chunks were successfully generated")
         
-        print(f"\nSuccessfully generated {len(chunk_files)} audio chunks")
+        print(f"\nSuccessfully generated {len(chunk_files)} out of {valid_chunk_count} chunks")
         return chunk_files
     
     def try_merge_with_ffmpeg(self, chunk_files: List[str], output_filename: str = "merged_audio.mp3", keep_chunks: bool = True) -> str:
@@ -307,9 +338,10 @@ def main():
     VOICE_CHOICE = "English Female"       # <- "English Female" or "Vietnamese Female"
     TRY_MERGE = True                      # <- Try to merge with ffmpeg if available
     KEEP_CHUNKS = True                    # <- Keep individual chunk files after merging
+    MAX_CONCURRENT_CHUNKS = 3             # <- Maximum chunks to process simultaneously (1-5 recommended)
     
-    # Create converter instance
-    converter = TTSConverter(FOLDER_PATH)
+    # Create converter instance with concurrent processing
+    converter = TTSConverter(FOLDER_PATH, max_concurrent_chunks=MAX_CONCURRENT_CHUNKS)
     
     # Set voice based on choice
     if VOICE_CHOICE in converter.voices:
