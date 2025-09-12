@@ -14,6 +14,63 @@ import edge_tts
 from typing import List
 
 
+class CustomSRTMaker:
+    """Custom SRT maker that works with SentenceBoundary events."""
+    
+    def __init__(self):
+        self.cues = []
+        self.cue_index = 1
+    
+    def feed_sentence(self, sentence_chunk):
+        """Feed a SentenceBoundary event to create SRT cue."""
+        if sentence_chunk["type"] != "SentenceBoundary":
+            return
+        
+        # Convert offset and duration from ticks to seconds
+        # Edge TTS uses 10,000 ticks per millisecond
+        start_ms = sentence_chunk["offset"] / 10000  # Convert to milliseconds
+        duration_ms = sentence_chunk["duration"] / 10000  # Convert to milliseconds
+        end_ms = start_ms + duration_ms
+        
+        # Convert to SRT time format (HH:MM:SS,mmm)
+        start_time = self._ms_to_srt_time(start_ms)
+        end_time = self._ms_to_srt_time(end_ms)
+        
+        # Create SRT cue
+        cue = {
+            'index': self.cue_index,
+            'start': start_time,
+            'end': end_time,
+            'text': sentence_chunk.get('text', '').strip()
+        }
+        
+        if cue['text']:  # Only add non-empty text
+            self.cues.append(cue)
+            self.cue_index += 1
+    
+    def _ms_to_srt_time(self, milliseconds):
+        """Convert milliseconds to SRT time format (HH:MM:SS,mmm)."""
+        hours = int(milliseconds // 3600000)
+        minutes = int((milliseconds % 3600000) // 60000)
+        seconds = int((milliseconds % 60000) // 1000)
+        ms = int(milliseconds % 1000)
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d},{ms:03d}"
+    
+    def get_srt(self):
+        """Generate SRT format string from collected cues."""
+        if not self.cues:
+            return ""
+        
+        srt_lines = []
+        for cue in self.cues:
+            srt_lines.append(str(cue['index']))
+            srt_lines.append(f"{cue['start']} --> {cue['end']}")
+            srt_lines.append(cue['text'])
+            srt_lines.append("")  # Empty line between cues
+        
+        return "\n".join(srt_lines)
+
+
 class TTSConverter:
     def __init__(self, folder_path: str, voice: str = "en-US-JennyNeural", max_concurrent_chunks: int = 3):
         self.folder_path = Path(folder_path)
@@ -117,10 +174,12 @@ class TTSConverter:
         
         return chunks
     
-    async def generate_chunk_audio_robust(self, chunk_text: str, chunk_num: int, prefix: str = "chunk") -> str:
+    async def generate_chunk_audio_robust(self, chunk_text: str, chunk_num: int, prefix: str = "chunk", generate_srt: bool = False) -> tuple:
         """Generate MP3 audio for a single chunk using robust streaming method."""
         output_filename = f"{prefix}_{chunk_num:03d}.mp3"
+        srt_filename = f"{prefix}_{chunk_num:03d}.srt" if generate_srt else None
         output_path = self.folder_path / output_filename
+        srt_path = self.folder_path / srt_filename if srt_filename else None
         
         try:
             print(f"Generating {output_filename} ({len(chunk_text)} chars)...")
@@ -134,12 +193,17 @@ class TTSConverter:
                 pitch=self.pitch
             )
             
+            # Create SRT maker if needed
+            srt_maker = CustomSRTMaker() if generate_srt else None
+            
             # Use streaming approach like in your working example
             with output_path.open("wb") as f:
                 async for chunk in communicate.stream():
                     chunk_type = chunk.get("type")
                     if chunk_type == "audio":
                         f.write(chunk["data"])
+                    elif chunk_type == "SentenceBoundary" and srt_maker:
+                        srt_maker.feed_sentence(chunk)
             
             # Verify file was created and has content
             if not output_path.exists():
@@ -149,14 +213,27 @@ class TTSConverter:
             if file_size == 0:
                 raise RuntimeError(f"Output file is empty: {output_filename}")
             
+            # Generate SRT file if requested
+            if generate_srt and srt_maker and srt_path:
+                srt_content = srt_maker.get_srt()
+                if srt_content:
+                    with open(srt_path, "w", encoding="utf-8") as srt_file:
+                        srt_file.write(srt_content)
+                    print(f"Generated {srt_filename} ({len(srt_maker.cues)} cues)")
+                else:
+                    print(f"No SRT content generated for {srt_filename}")
+                    srt_path = None
+            
             print(f"Generated {output_filename} ({file_size} bytes)")
-            return str(output_path)
+            return str(output_path), str(srt_path) if srt_path else None
             
         except Exception as e:
             print(f"Failed to generate {output_filename}: {e}")
-            # Clean up failed file
+            # Clean up failed files
             if output_path.exists():
                 output_path.unlink()
+            if srt_path and srt_path.exists():
+                srt_path.unlink()
             raise RuntimeError(f"TTS generation failed for chunk {chunk_num}: {e}")
     
     async def generate_chunk_with_semaphore(self, semaphore: asyncio.Semaphore, chunk: str, index: int, prefix: str) -> tuple:
@@ -338,6 +415,7 @@ def main():
     VOICE_CHOICE = "English Female"       # <- "English Female" or "Vietnamese Female"
     TRY_MERGE = True                      # <- Try to merge with ffmpeg if available
     KEEP_CHUNKS = True                    # <- Keep individual chunk files after merging
+    GENERATE_SRT = True                   # <- Generate SRT subtitle files
     MAX_CONCURRENT_CHUNKS = 3             # <- Maximum chunks to process simultaneously (1-5 recommended)
     
     # Create converter instance with concurrent processing

@@ -6,6 +6,7 @@ A cross-platform Python application that converts long text files to high-qualit
 
 - 🎙️ **High-quality voices**: English (Jenny Neural) and Vietnamese (Hoai My Neural)
 - 📝 **Smart text chunking**: Respects sentence boundaries for natural audio flow
+- 📺 **SRT subtitle generation**: Creates synchronized subtitle files for each chunk
 - 🖥️ **User-friendly GUI**: Easy-to-use interface with real-time progress tracking
 - 📁 **Auto-organization**: Files automatically saved to Output folder
 - 🔧 **Flexible options**: Keep or delete individual chunks after merging
